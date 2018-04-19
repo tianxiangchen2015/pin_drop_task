@@ -102,33 +102,8 @@ print (model.summary())
 opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
     #checkerpoint = ModelCheckpoint(model_path+'best_se_{}.h5', monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
 model.compile(optimizer=opt,
-                  loss=losses.binary_crossentropy, metrics=[metrics.categorical_accuracy])
+                  loss=losses.binary_crossentropy, metrics=[metrics.binary_crossentropy])
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
                           epochs=40, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
 
-# input_layer = Input(shape=(500, 40))
-#
-# # Decision level single attention
-# hidden_units = 256
-# a1 = Dense(hidden_units)(input_layer)
-# a1 = BatchNormalization()(a1)
-# a1 = Activation('relu')(a1)
-# a1 = Dropout(drop_rate)(a1)
-#
-# a2 = Dense(hidden_units)(a1)
-# a2 = BatchNormalization()(a2)
-# a2 = Activation('relu')(a2)
-# a2 = Dropout(drop_rate)(a2)
-#
-# a3 = Dense(hidden_units)(a2)
-# a3 = BatchNormalization()(a3)
-# a3 = Activation('relu')(a3)
-# a3 = Dropout(drop_rate)(a3)
-#
-# # cla = Dense(classes_num, activation='sigmoid')(a3)
-# # att = Dense(classes_num, activation='softmax')(a3)
-# # output_layer = Lambda(
-#     # attention_pooling, output_shape=pooling_shape)([cla, att])
-# model = Model(inputs=input_layer, outputs=a3)
-# print (model.summary())
