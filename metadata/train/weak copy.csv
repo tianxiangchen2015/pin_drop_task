@@ -70,6 +70,7 @@ YmOfTDGOGBpI_160.000_170.000.wav	Alarm_bell_ringing,Running_water
 YmpAYvNw6VEw_40.000_50.000.wav	Alarm_bell_ringing,Speech
 Yn2u-4A9fY28_20.000_30.000.wav	Alarm_bell_ringing,Speech,Dog
 YoFcRyerYBfM_30.000_40.000.wav	Alarm_bell_ringing
+Yp6CYj_0IR28_0.000_4.000.wav	Alarm_bell_ringing
 YqDCK7vo_MCM_140.000_150.000.wav	Alarm_bell_ringing,Speech
 YqGDaSUy-llQ_0.000_9.000.wav	Alarm_bell_ringing
 Yr4auqsn1UuA_430.000_440.000.wav	Alarm_bell_ringing
@@ -81,6 +82,7 @@ YyNNf4uTzPjQ_10.000_20.000.wav	Alarm_bell_ringing
 YylADXwDnjwY_550.000_560.000.wav	Alarm_bell_ringing
 YzNvgZ5QPAFI_30.000_40.000.wav	Alarm_bell_ringing,Speech
 Y0632OqvXrwg_7.000_17.000.wav	Cat,Speech
+Y06Mm032486Q_30.000_40.000.wav	Cat
 Y08R27f6Ffdk_6.000_16.000.wav	Cat,Speech
 Y0Am7X758-Ek_30.000_40.000.wav	Cat
 Y0CEQ565DH_A_30.000_40.000.wav	Cat,Speech
@@ -108,6 +110,7 @@ Y0q1Ytfn8yMU_10.000_20.000.wav	Cat
 Y0rJwumFz1O0_30.000_40.000.wav	Cat
 Y0uab4-3d6MM_30.000_40.000.wav	Cat
 Y0v87UfMga5U_30.000_40.000.wav	Cat
+Y0xhygj2rhpk_21.000_31.000.wav	Cat,Speech
 Y0xzbWmrJCa0_30.000_40.000.wav	Cat
 Y0zv4NcZfYhE_24.000_34.000.wav	Cat
 Y11rKpXBR_ck_24.000_34.000.wav	Cat
@@ -144,6 +147,7 @@ Y1tJdV9lG8dI_30.000_40.000.wav	Cat
 Y1vEjPObCs-c_6.000_16.000.wav	Cat
 Y1wTYC26te1E_30.000_40.000.wav	Cat
 Y1x2dJASMVi4_30.000_40.000.wav	Cat
+Y1zEJWzqb59A_0.000_10.000.wav	Cat
 Y1zYsKe5HhsQ_21.000_31.000.wav	Cat
 Y2-dHuNPOmFg_30.000_40.000.wav	Cat
 Y221Ia1cD5dQ_22.000_32.000.wav	Cat
@@ -267,6 +271,7 @@ Y-4i49rWLl1o_20.000_30.000.wav	Dog
 Y-4oBn8qurR4_25.000_35.000.wav	Dog
 Y-5IoPSM59xM_9.000_19.000.wav	Dog
 Y-5rnGk2e1ao_0.000_10.000.wav	Dog
+Y-799s1wQehA_110.000_120.000.wav	Dog
 Y-7T1vQ2CgdQ_10.000_20.000.wav	Dog,Alarm_bell_ringing
 Y-7Y8Cmjdvuk_20.000_30.000.wav	Dog
 Y-7khzUmnlm8_30.000_40.000.wav	Dog
@@ -292,8 +297,10 @@ Y-KzCxE1X5j0_30.000_40.000.wav	Dog
 Y-L46ZLyp9R0_30.000_40.000.wav	Dog
 Y-LWu_lirwKk_0.000_10.000.wav	Dog,Speech
 Y-LqG7GIW8UQ_110.000_120.000.wav	Dog
+Y-N7Qwe8goRc_20.000_30.000.wav	Dog
 Y-Nsu5Dm73Xw_0.000_10.000.wav	Dog
 Y-O-s44NpuEo_30.000_40.000.wav	Dog
+Y-OIGDKhH1cQ_10.000_20.000.wav	Dog
 Y-OYEgBWbvr4_0.000_10.000.wav	Dog
 Y-PIv8H-fn5U_50.000_60.000.wav	Dog,Speech
 Y-PWc49x8cyE_30.000_40.000.wav	Dog
@@ -446,6 +453,7 @@ Y0lUFEAnnET8_30.000_40.000.wav	Dog
 Y0lV5Fln3nYA_390.000_400.000.wav	Dog
 Y0m5K90TnZhI_30.000_40.000.wav	Dog,Speech
 Y0m9QkjCVwcU_30.000_40.000.wav	Dog,Speech
+Y0mkHrcDzecQ_90.000_100.000.wav	Dog
 Y5_OJsj6bcuo_260.000_270.000.wav	Dishes,Frying,Speech
 Y8EQHKEd5mm4_120.000_130.000.wav	Dishes,Frying
 YA_0MlszhCDE_180.000_190.000.wav	Dishes,Frying,Speech
@@ -520,6 +528,7 @@ Y4cV4T8ACLh8_290.000_300.000.wav	Frying,Speech,Dishes
 Y4dYGxoFrg_U_120.000_130.000.wav	Frying,Speech,Dishes
 Y4dcmUaJWEBA_250.000_260.000.wav	Speech,Frying
 Y4fz0-Kx2oNs_250.000_260.000.wav	Frying
+Y4n7ne-sC-JM_520.000_530.000.wav	Frying
 Y4nHPpC6oGn4_100.000_110.000.wav	Frying,Speech,Dishes
 Y4pk8AgcjwHI_100.000_110.000.wav	Frying,Speech,Dishes
 Y4yx7AdsRAOs_0.000_10.000.wav	Frying,Speech,Dishes
@@ -575,6 +584,7 @@ Y9JbcP3y9hYU_560.000_570.000.wav	Frying,Speech,Dishes
 Y9KPk292No4k_140.000_150.000.wav	Speech,Frying
 Y9V_qFBGs5yY_240.000_250.000.wav	Speech,Frying
 Y9YO1aiPy2A4_280.000_290.000.wav	Frying,Speech
+Y9_HGCP0zg-4_30.000_40.000.wav	Frying,Speech,Dishes
 Y9aPbbNZGKM4_140.000_150.000.wav	Frying,Speech,Dishes
 Y9bQxINhcasI_30.000_40.000.wav	Frying,Speech,Dishes
 Y9iGjureW7uE_80.000_90.000.wav	Frying
@@ -641,8 +651,10 @@ Y4RPbOWqEeVk_310.000_320.000.wav	Dishes
 Y4SDfWBgrXVM_10.000_20.000.wav	Dishes
 Y4XoQgeO26Ls_0.000_9.000.wav	Dishes
 Y4fti1n2kmss_10.000_20.000.wav	Dishes
+Y4vjsxKB1d5o_310.000_320.000.wav	Dishes
 Y5D2UdmWOipI_10.000_20.000.wav	Dishes
 Y69VgW9hZ1jc_190.000_200.000.wav	Dishes
+Y6faPFBUvXh0_200.000_210.000.wav	Dishes
 Y6hpAs8vJOow_70.000_80.000.wav	Dishes
 Y75Ro0rRqJdg_50.000_60.000.wav	Dishes
 Y7C4HntU8OzA_0.000_10.000.wav	Dishes
@@ -806,6 +818,7 @@ Y8_H6Pxw2hdI_80.000_90.000.wav	Electric_shaver_toothbrush
 Y8zgQgREF1rA_210.000_220.000.wav	Electric_shaver_toothbrush,Speech
 Y948s7w-mFs8_460.000_470.000.wav	Electric_shaver_toothbrush
 Y9TAqtOkm1oY_20.000_30.000.wav	Electric_shaver_toothbrush
+Y9UREnfaEBIs_180.000_190.000.wav	Electric_shaver_toothbrush,Speech
 Y9vnCi8nepzY_10.000_20.000.wav	Electric_shaver_toothbrush
 YAaeemnJDijQ_300.000_310.000.wav	Electric_shaver_toothbrush,Speech
 YClD5nZPCYpo_340.000_350.000.wav	Electric_shaver_toothbrush
@@ -856,6 +869,7 @@ Y-toGk_oBULM_330.000_340.000.wav	Blender,Speech
 Y-uIrOdeAZbQ_10.000_20.000.wav	Blender
 Y0R06GmUsGww_40.000_50.000.wav	Blender
 Y0Tt-SGltms0_480.000_490.000.wav	Blender,Speech
+Y0XURSgwK0VA_210.000_220.000.wav	Blender,Speech
 Y0_zh25VgrPY_50.000_60.000.wav	Blender
 Y0hy1fvEH4Zs_30.000_40.000.wav	Blender,Speech
 Y0kLEZglWPAI_230.000_240.000.wav	Blender
@@ -896,6 +910,7 @@ Y4uuGBWihU3g_100.000_110.000.wav	Blender
 Y4xIq6W9b4jY_60.000_70.000.wav	Blender,Speech
 Y52dupxkQbFo_260.000_270.000.wav	Blender,Speech
 Y558YuvyAoao_50.000_60.000.wav	Blender,Speech
+Y56hglfxZmSA_200.000_210.000.wav	Blender
 Y57L82bDE3qw_360.000_370.000.wav	Blender
 Y585sVgKWYHg_130.000_140.000.wav	Blender
 Y5EZwT9M5pSA_60.000_70.000.wav	Blender
@@ -946,11 +961,13 @@ YB6ggNg0zh7g_50.000_60.000.wav	Blender,Speech
 YBi6KCe9AM30_150.000_160.000.wav	Blender,Speech,Dishes
 YBkUdwj5JR0Q_20.000_30.000.wav	Blender,Speech
 YBma1LAXdxoI_80.000_90.000.wav	Blender
+YBr8Rn5iN8ko_80.000_90.000.wav	Blender,Speech
 YBuYLhXrknLc_60.000_70.000.wav	Blender,Speech
 YBwJgOCnwsA8_80.000_90.000.wav	Blender,Speech
 YC2ZwwKIThvU_10.000_20.000.wav	Blender
 YC6G6Clcqhvs_170.000_180.000.wav	Blender
 YC8NPjvCLGak_20.000_30.000.wav	Blender
+YC8obKwBa33A_40.000_50.000.wav	Blender,Speech,Dishes
 YC9cqgHZeGxo_170.000_180.000.wav	Blender,Speech
 YCFyKc5-3BF0_420.000_430.000.wav	Blender,Speech
 YCG6PGt5GazM_0.000_10.000.wav	Blender
@@ -982,14 +999,17 @@ Y-ZZ16CynYAU_40.000_50.000.wav	Running_water
 Y-_SpAZLpoWw_130.000_140.000.wav	Running_water,Speech
 Y-yJiF8j1mBg_40.000_50.000.wav	Running_water,Speech
 Y0-_qA6N0U0U_130.000_140.000.wav	Running_water,Speech
+Y0UMoM9GT5Ws_100.000_110.000.wav	Running_water
 Y0aFcKmzH5uM_70.000_80.000.wav	Running_water,Speech
 Y0cnz5UnKhVQ_20.000_30.000.wav	Running_water,Speech
 Y0dGRxCpfAAU_330.000_340.000.wav	Running_water,Speech
 Y0efD01_zD8o_20.000_30.000.wav	Running_water,Dishes
 Y0m3vVvKpVQg_0.000_10.000.wav	Running_water
+Y102JJRQMSWI_330.000_340.000.wav	Running_water,Speech
 Y154QbSZVTgw_30.000_40.000.wav	Running_water,Speech
 Y1Q2KE92L738_40.000_50.000.wav	Running_water
 Y1WI4qtcajVE_60.000_70.000.wav	Running_water
+Y1g_Q4M0-2Wk_300.000_310.000.wav	Running_water,Speech
 Y1kBcy6e8C6U_10.000_20.000.wav	Running_water,Speech
 Y1l2JCxeQzz8_190.000_200.000.wav	Running_water,Speech
 Y1oHc2z4CcQE_170.000_180.000.wav	Running_water,Speech
@@ -1000,6 +1020,7 @@ Y2Cwb4A7_BKU_520.000_530.000.wav	Running_water,Speech
 Y2UEONa82Uqc_440.000_450.000.wav	Running_water,Speech
 Y2aOxQ7yhhcs_490.000_500.000.wav	Running_water,Speech
 Y2az5_nabV6Q_280.000_290.000.wav	Running_water
+Y2evVhUh-lHI_50.000_60.000.wav	Running_water
 Y2j5WqXOAQFc_290.000_300.000.wav	Running_water,Speech
 Y2lpy_JOBHLM_150.000_160.000.wav	Running_water,Speech
 Y2nKHeUk3hc4_280.000_290.000.wav	Running_water,Speech
@@ -1044,6 +1065,7 @@ YBKSjAQdCpHQ_60.000_70.000.wav	Running_water,Speech
 YBMDKkCbuzhg_260.000_270.000.wav	Running_water,Speech
 YBSUZp6JIM38_160.000_170.000.wav	Running_water
 YBbFqr4n4IZA_120.000_130.000.wav	Running_water,Speech
+YC418nNoQeeA_220.000_230.000.wav	Running_water,Speech
 YC6Ljue5PzIU_240.000_250.000.wav	Running_water
 YC7Cf1q11zRw_530.000_540.000.wav	Running_water,Speech
 YCAPCNEViaeo_30.000_40.000.wav	Running_water
@@ -1083,6 +1105,8 @@ YJSfuu1BOwRo_0.000_10.000.wav	Running_water
 YJjrgFhpGlB8_70.000_80.000.wav	Running_water
 YJrJAL0TyUCc_190.000_200.000.wav	Running_water,Speech
 YK8hvtDv4Pu0_360.000_370.000.wav	Running_water,Speech
+YK97MbozOfeM_130.000_140.000.wav	Running_water
+YKG68Xooiy4Y_120.000_130.000.wav	Running_water,Speech
 YKRPlcAANvn0_120.000_130.000.wav	Running_water
 YKWYMHBrFzko_110.000_120.000.wav	Running_water,Speech
 YKWxy6GNZIOM_10.000_20.000.wav	Running_water
@@ -1124,9 +1148,11 @@ YRr2e7xqYDzs_0.000_6.000.wav	Running_water
 YRydJj9VhwPA_30.000_40.000.wav	Running_water
 YS1mcQ3hgKLM_20.000_30.000.wav	Running_water
 YS7_mWTET9to_30.000_40.000.wav	Running_water
+YSEfck-Wvy2s_360.000_370.000.wav	Running_water,Speech
 YSagw-Umk5O8_50.000_60.000.wav	Running_water
 YSdxSgz-RrHQ_140.000_150.000.wav	Running_water
 YSo2BdqpfkK0_90.000_100.000.wav	Running_water
+YSoHW3xQFkqU_30.000_40.000.wav	Running_water
 YTVM8-QR64L8_30.000_40.000.wav	Running_water,Speech
 YTadbPYUHAvs_130.000_140.000.wav	Running_water
 YU0gtX-O9xC4_20.000_30.000.wav	Running_water
@@ -1180,6 +1206,7 @@ Y1sGbBTYBxDg_20.000_30.000.wav	Running_water
 Y1sTktH04-fw_40.000_50.000.wav	Running_water
 Y20nyHEh2HW0_30.000_40.000.wav	Running_water
 Y26-HMlPhve4_20.000_30.000.wav	Running_water
+Y27OJnL93_xc_270.000_280.000.wav	Running_water
 Y2BwiNhqCOFg_160.000_170.000.wav	Running_water
 Y2ErfX6ZT5pM_0.000_10.000.wav	Running_water
 Y2NP0fuxn-Q8_0.000_9.000.wav	Running_water
@@ -1227,6 +1254,7 @@ Y4z2LSoUlWYk_180.000_190.000.wav	Running_water
 Y52l9n3JCtSk_60.000_70.000.wav	Running_water
 Y53jtALXeS7U_40.000_50.000.wav	Running_water
 Y53ktQBZmxUM_0.000_10.000.wav	Running_water
+Y58f0fFt0y4o_30.000_40.000.wav	Running_water
 Y59UL9Up9a3o_90.000_100.000.wav	Running_water
 Y59oDk6IRkB8_10.000_20.000.wav	Running_water
 Y5EcrQhp7We0_40.000_50.000.wav	Running_water
@@ -1301,6 +1329,7 @@ Y-3WtffZs4rk_30.000_40.000.wav	Vacuum_cleaner
 Y-8kh4JEvkzw_0.000_10.000.wav	Vacuum_cleaner
 Y-8myqx-cnlc_500.000_510.000.wav	Vacuum_cleaner
 Y-NEAWkNvWvs_170.000_180.000.wav	Vacuum_cleaner
+Y-OMdnou20dc_30.000_40.000.wav	Vacuum_cleaner
 Y-SPr6nTlav0_170.000_180.000.wav	Speech,Vacuum_cleaner
 Y-m5YF2UJeVw_70.000_80.000.wav	Vacuum_cleaner
 Y-mRxPWXrSsY_280.000_290.000.wav	Vacuum_cleaner
@@ -1345,6 +1374,7 @@ Y41TTeZMRpzs_30.000_40.000.wav	Speech,Dog,Vacuum_cleaner
 Y435H0Ai36E4_40.000_50.000.wav	Vacuum_cleaner
 Y49C15x4FItg_200.000_210.000.wav	Vacuum_cleaner
 Y4ITETcfpgSs_0.000_10.000.wav	Vacuum_cleaner
+Y4P1kVpir3iU_120.000_130.000.wav	Vacuum_cleaner
 Y4SnjARXXyTo_20.000_30.000.wav	Vacuum_cleaner
 Y4f9OKlHoBsk_40.000_50.000.wav	Vacuum_cleaner
 Y4kPq4Ff9HiA_90.000_100.000.wav	Speech,Vacuum_cleaner
@@ -1384,6 +1414,7 @@ Y83M4YuLzP8Q_0.000_10.000.wav	Vacuum_cleaner
 Y83hygpk4VKY_120.000_130.000.wav	Vacuum_cleaner
 Y86eQxmsjwM4_310.000_320.000.wav	Vacuum_cleaner
 Y86rBaUnvabk_40.000_50.000.wav	Vacuum_cleaner
+Y8BoAvuGnzOg_160.000_170.000.wav	Vacuum_cleaner
 Y8EE7q8Gn5-s_110.000_120.000.wav	Vacuum_cleaner
 Y8ENkXXxH0ek_300.000_310.000.wav	Vacuum_cleaner
 Y8JMFVd_3Fq0_60.000_70.000.wav	Vacuum_cleaner
@@ -1393,6 +1424,7 @@ Y97_dBJobzaE_50.000_60.000.wav	Vacuum_cleaner
 Y9FcBsEzihqI_80.000_90.000.wav	Speech,Vacuum_cleaner
 Y9KhDXUt5IoM_370.000_380.000.wav	Vacuum_cleaner
 Y9ige_Pfo-2Q_30.000_40.000.wav	Vacuum_cleaner
+YAe8B5sRWloc_170.000_180.000.wav	Vacuum_cleaner
 YAgPBflnMOss_90.000_100.000.wav	Vacuum_cleaner
 YAkZ84GRil04_210.000_220.000.wav	Vacuum_cleaner,Speech
 YAuCSBtuEI-k_40.000_50.000.wav	Vacuum_cleaner
@@ -1443,6 +1475,7 @@ YI_GAhp3M4kQ_0.000_10.000.wav	Vacuum_cleaner,Speech
 YIb7cg0gudCs_170.000_180.000.wav	Vacuum_cleaner
 YIl2uf1KAnt4_0.000_10.000.wav	Vacuum_cleaner
 YIlVuPQ11gzM_120.000_130.000.wav	Vacuum_cleaner
+YIqJ2JGeJiQw_190.000_200.000.wav	Speech,Vacuum_cleaner
 YJHY4kY-D7U0_440.000_450.000.wav	Vacuum_cleaner
 YJPUb0c4hUgY_490.000_500.000.wav	Vacuum_cleaner
 YJTk_7jVeW64_0.000_10.000.wav	Vacuum_cleaner
@@ -1522,6 +1555,7 @@ YpSWPHSz6jHE_30.000_40.000.wav	Electric_shaver_toothbrush
 Yqa9pb77jMQg_120.000_130.000.wav	Electric_shaver_toothbrush,Speech
 YsRlBSp0r0dg_150.000_160.000.wav	Electric_shaver_toothbrush,Speech
 Yv2YA8-WMI-w_10.000_20.000.wav	Electric_shaver_toothbrush,Speech
+YwQN8fexVPSI_223.000_233.000.wav	Electric_shaver_toothbrush,Speech
 YwqQU8VXGyS0_390.000_400.000.wav	Electric_shaver_toothbrush,Speech
 YxvgPSItdFXw_270.000_280.000.wav	Electric_shaver_toothbrush,Speech
 YyDw1Swpj_-w_100.000_110.000.wav	Electric_shaver_toothbrush,Speech
