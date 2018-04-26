@@ -9,6 +9,14 @@ from python_speech_features import mfcc, logfbank
 #from tensorflow.python.ops import io_ops
 
 
+def shuffle_data(labels, fns, rnd_seed=None):
+    np.random.seed(rnd_seed)
+    p = np.random.permutation(len(fns))
+    fns_shuffle = [fns[i] for i in p]
+    labels_shuffle = [labels[i] for i in p]
+    return labels_shuffle, fns_shuffle
+
+
 class DataGenerator():
     def __init__(self, batch_size=32, vad_mode=None, data_list=None):
         """
@@ -48,7 +56,6 @@ class DataGenerator():
             x_data.append(Sxx.reshape(1, Sxx.shape[0], Sxx.shape[1], 1))
             
         return np.vstack(x_data)
-        
     
     def train_valid_split(self):
         
@@ -127,10 +134,100 @@ class DataGenerator():
         return len(self.train_labels), len(self.test_labels)
 
 
-def shuffle_data(labels, fns, rnd_seed=None):
-    np.random.seed(rnd_seed)
-    p = np.random.permutation(len(fns))
-    fns_shuffle = [fns[i] for i in p] 
-    labels_shuffle = [labels[i] for i in p]
-    return labels_shuffle, fns_shuffle
+class AudioGenerator():
+    def __init__(self, batch_size=32, labels=None, fns=None):
+        """
+        Params:
+            step (int): Step size in milliseconds between windows (for spectrogram ONLY)
+            window (int): FFT window size in milliseconds (for spectrogram ONLY)
+            max_freq (int): Only FFT bins corresponding to frequencies between
+                [0, max_freq] are returned (for spectrogram ONLY)
+        """
 
+        self.train_index = 0
+        self.batch_size = batch_size
+        self.train_labels = labels
+        self.train_fns = fns
+        self.shuffle_data_by_partition()
+
+    def gen_spectrogram(self, filenames):
+        """ For a given audio clip, calculate the corresponding feature
+        Params:
+            audio_clip (str): Path to the audio clip
+        """
+        x_data = []
+        for filename in filenames:
+            fs, wav = wavfiles.read(filename)
+            # print(wav.shape, filename)
+            if len(wav.shape) > 1:
+                wav = wav[:, 0]
+            if wav.shape[0] < 441000:
+                pad_with = 441000 - wav.shape[0]
+                wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
+            elif wav.shape[0] > 441000:
+                wav = wav[0:441000]
+            Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            x_data.append(Sxx.reshape(1, Sxx.shape[0]*Sxx.shape[1]))
+
+        return np.vstack(x_data)
+
+    def shuffle_data_by_partition(self):
+        self.train_labels, self.train_fns = shuffle_data(self.train_labels, self.train_fns)
+
+    def get_next(self):
+        cur_index = self.train_index
+        audio_files = self.train_fns
+        labels = self.train_labels
+
+        X_labels = labels[cur_index: cur_index + self.batch_size]
+        filenames = audio_files[cur_index: cur_index + self.batch_size]
+        X_data = self.gen_spectrogram(filenames)
+
+        outputs = np.vstack(X_labels)
+        inputs = X_data
+
+        self.train_index += self.batch_size
+        if self.train_index > len(self.train_labels) - self.batch_size:
+            self.train_index = 0
+            self.shuffle_data_by_partition()
+
+        return (inputs, outputs)
+
+    def next_train(self):
+        while True:
+            ret = self.get_next()
+            self.train_index += self.batch_size
+            if self.train_index > len(self.train_labels) - self.batch_size:
+                self.train_index = 0
+                self.shuffle_data_by_partition()
+            return ret
+
+    def rnd_one_sample(self):
+
+        rnd = np.random.choice(len(self.train_labels), 1)[0]
+        Sxx = self.gen_spectrogram([self.train_fns[rnd]])
+        return self.train_labels, Sxx
+
+    def get_train_test_num(self):
+        return len(self.train_labels), len(self.train_labels)
+
+
+class SemiDataGenerator():
+    def __init__(self, labeled_data, unlabeled_data, batch_size=32):
+        self.batch_size = batch_size
+        self.labeled_lbs, self.labeled_fns = labeled_data
+        self.unlabeled_lbs, self.unlabeled_fns = unlabeled_data
+        self.n_labels = len(self.labeled_fns)
+        self.labeled_data_generator = AudioGenerator(batch_size=self.batch_size, labels=self.labeled_lbs, fns=self.labeled_fns)
+        self.unlabeled_data_generator = AudioGenerator(batch_size=self.batch_size, labels=self.unlabeled_lbs, fns=self.unlabeled_fns)
+
+    def next_batch(self):
+        unlabeled_feats, _ = self.unlabeled_data_generator.get_next()
+        if self.batch_size > self.n_labels:
+            labeled_feats, labels = self.labeled_data_generator.get_next()
+        else:
+            labeled_feats, labels = self.labeled_data_generator.get_next()
+
+        inputs = np.vstack([labeled_feats, unlabeled_feats])
+
+        return inputs, labels
