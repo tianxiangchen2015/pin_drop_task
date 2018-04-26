@@ -5,7 +5,7 @@ from data_generator import DataGenerator, AudioGenerator, SemiDataGenerator
 
 def load_train_weak():
     data_list = 'metadata/train/weak.csv'
-    path = '/Users/tchen/git/dcase2018_baseline/task4/dataset/audio/train/weak/'
+    path = 'audio/train/weak/'
     df = pd.read_csv(data_list, sep='\t')
     df['filename'] = path + df['filename']
     fns = df.filename.values
@@ -17,7 +17,7 @@ def load_train_weak():
 def load_unlabel_data():
     data_list = 'metadata/train/unlabel_in_domain.csv'
     missing_list = 'metadata/missing_files_unlabel_in_domain.csv'
-    path = '/Users/tchen/git/dcase2018_baseline/task4/dataset/audio/train/unlabel_in_domain/'
+    path = 'audio/train/unlabel_in_domain/'
     df = pd.read_csv(data_list, sep='\t')
     df_miss = pd.read_csv(missing_list, sep=',')
     fns_miss = df_miss.filename.values
@@ -32,7 +32,7 @@ def load_unlabel_data():
 def load_validation_data():
     data_list = 'metadata/test/test.csv'
     missing_list = 'metadata/missing_files_test.csv'
-    path = '/Users/tchen/git/dcase2018_baseline/task4/dataset/audio/test/'
+    path = 'audio/test/'
     df = pd.read_csv(data_list, sep='\t')
     df_miss = pd.read_csv(missing_list, sep=',')
     fns_miss = df_miss.filename.values
