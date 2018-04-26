@@ -2,6 +2,17 @@ import pandas as pd
 import numpy as np
 
 from data_generator import DataGenerator, AudioGenerator, SemiDataGenerator
+import tensorflow as tf
+from tensorflow.python.ops import control_flow_ops
+import math
+import os
+import csv
+import matplotlib.pyplot as plt
+
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
+
 
 def load_train_weak():
     data_list = 'metadata/train/weak.csv'
@@ -64,14 +75,6 @@ semi_gen = SemiDataGenerator(labeled_data=[y_train_one_hot, X_train_fn], unlabel
 # Validation generator
 valid_gen = AudioGenerator(labels=y_test_one_hot, fns=X_test_fns)
 print(valid_gen.get_next()[0].shape)
-
-
-import tensorflow as tf
-from tensorflow.python.ops import control_flow_ops
-import math
-import os
-import csv
-import matplotlib.pyplot as plt
 
 channel_sizes = [1,12,10,10]  #Last layer will by fully conv
 denoising_cost =10* np.array([10.0, 10.0,0.1, 0.10])
