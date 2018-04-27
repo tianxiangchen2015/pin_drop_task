@@ -10,7 +10,9 @@ import numpy as np
 from data_generator import DataGenerator
 import pandas as pd
 import tensorflow as tf
-print (tf.__version__)
+config = tf.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.Session(config=config)
 
 from utils import load_train_weak
 
