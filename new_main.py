@@ -4,7 +4,8 @@ from keras import losses
 from keras import metrics
 from keras.models import Model, load_model
 from keras.layers import (Input, Dense, BatchNormalization, Dropout, Lambda,
-                          Activation, Concatenate, Conv2D, MaxPooling2D)
+                          Activation, Concatenate, Conv2D, MaxPooling2D, Reshape, 
+                          TimeDistributed, Flatten, Bidirectional, LSTM)
 from keras.initializers import lecun_normal
 import numpy as np
 from data_generator import DataGenerator
@@ -76,27 +77,63 @@ image_shape = Sxx.shape
 print(image_shape)
 
 input_layer = Input(shape=(image_shape[1], image_shape[2], 1))
-
-cnn = Conv2D(64, (3, 3), padding='same', kernel_initializer=lecun_normal(seed=None), activation='selu')
-cnn = cnn(input_layer)
+cnn = Conv2D(64, (3, 3), padding='same')(input_layer)
+cnn = Activation('relu')(cnn)
+cnn = MaxPooling2D((1, 5))(cnn)
+cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+cnn = Activation('relu')(cnn)
 cnn = MaxPooling2D((1, 4))(cnn)
-cnn = Conv2D(64, (3, 3), padding='same', kernel_initializer=lecun_normal(seed=None), activation='selu')(cnn)
-cnn = MaxPooling2D((1, 4))(cnn)
-cnn = Conv2D(64, (3, 3), padding='same', kernel_initializer=lecun_normal(seed=None), activation='selu')(cnn)
+cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+cnn = Activation('relu')(cnn)
 cnn = MaxPooling2D((1, 2))(cnn)
-dense_a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape)(cnn)
-dense_b = Dense(128, kernel_initializer=lecun_normal(seed=None), activation='selu')(dense_a)
-cla = Dense(classes_num, activation='sigmoid')(dense_b)
-att = Dense(classes_num, activation='softmax')(dense_b)
-output_layer = Lambda(attention_pooling, output_shape=pooling_shape)([cla, att])
+cnn = Reshape((499,64))(cnn)
+
+bi_lstm = Bidirectional(LSTM(128, return_sequences=True))(cnn)
+bi_lstm = Bidirectional(LSTM(128, return_sequences=True))(bi_lstm)
+dense_a = TimeDistributed(Dense(17, activation='relu'))(bi_lstm)
+dense_a = TimeDistributed(Dense(17, activation='sigmoid'))(dense_a)
+#dense_a = Dropout(drop_rate)(dense_a)
+flat = Flatten()(dense_a)
+output_layer = Dense(classes_num, activation='sigmoid')(flat)
+
 model = Model(inputs=input_layer, outputs=output_layer)
 print (model.summary())
+
+
+# Attention CNN
+'''
+input_layer = Input(shape=(image_shape[1], image_shape[2], 1))
+
+cnn = Conv2D(64, (3, 3), padding='valid')(input_layer)
+cnn = Activation('relu')(cnn)
+#cnn = MaxPooling2D((1, 4))(cnn)
+cnn = Conv2D(64, (3, 3), padding='valid')(cnn)
+cnn = Activation('relu')(cnn)
+#cnn = MaxPooling2D((1, 4))(cnn)
+cnn = Conv2D(64, (3, 3), padding='valid')(cnn)
+cnn = Activation('relu')(cnn)
+cnn = Conv2D(10, (493, 34), padding='valid')(cnn)
+cnn = Activation('relu')(cnn)
+#cnn = Reshape((1,10))(cnn)
+#dense_a = Dense(1024, activation='relu')(cnn)
+dense_a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape)(cnn)
+dense_b = Dense(128, kernel_initializer=lecun_normal(seed=None), activation='selu')(dense_a)
+cla = Dense(1024, activation='linear')(dense_a)
+att = Dense(1024, activation='sigmoid')(dense_a)
+dense_b = Lambda(attention_pooling, output_shape=pooling_shape)([cla, att])
+b1 = BatchNormalization()(dense_b)
+b1 = Activation(activation='relu')(b1)
+b1 = Dropout(drop_rate)(b1)
+output_layer = Dense(classes_num, activation='sigmoid')(b1)
+model = Model(inputs=input_layer, outputs=output_layer)
+print (model.summary())
+'''
 
 opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
 model.compile(optimizer=opt,
                   loss=losses.binary_crossentropy, metrics=[metrics.binary_crossentropy])
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
-                          epochs=1, validation_data=audio_gen.next_test(), validation_steps=validation_step,
+                          epochs=20, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
 model.save('models/event_detect_attention.h5')
 

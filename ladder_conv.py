@@ -7,7 +7,7 @@ from tensorflow.python.ops import control_flow_ops
 import math
 import os
 import csv
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 config = tf.ConfigProto()
 config.gpu_options.allow_growth=True
@@ -71,17 +71,17 @@ X_test_fns, test_labels = load_validation_data()
 y_test_one_hot = mlb.transform(test_labels)
 
 # Semi Train generator
-semi_gen = SemiDataGenerator(labeled_data=[y_train_one_hot, X_train_fn], unlabeled_data=[train_labels_u, train_fns_u])
+semi_gen = SemiDataGenerator(labeled_data=[y_train_one_hot, X_train_fn], unlabeled_data=[train_labels_u, train_fns_u], batch_size=batch_size)
 # Validation generator
 valid_gen = AudioGenerator(labels=y_test_one_hot, fns=X_test_fns)
 print(valid_gen.get_next()[0].shape)
 
-channel_sizes = [1,12,10,10]  #Last layer will by fully conv
-denoising_cost =10* np.array([10.0, 10.0,0.1, 0.10])
+channel_sizes = [1,64,64,64,10]  #Last layer will by fully conv
+denoising_cost =10* np.array([10.0, 10.0, 10.0,0.1, 0.10])
 
 
 logsave = False   # Do you want log files and checkpoint savers?
-vis = True        #Visualize the Original - Noised - Recovered for the unsupervised samples
+vis = False        #Visualize the Original - Noised - Recovered for the unsupervised samples
 
 C = len(channel_sizes) - 1 # number of channel sizes
 
@@ -92,11 +92,11 @@ for c in range(1,C):
   width_map_sizes += [width_map_sizes[c-1]-2]
 
 num_examples = X_train_fn.shape[0] + train_fns_u.shape[0]
-num_epochs = 150
+num_epochs = 100
 num_labeled = X_train_fn.shape[0]
 num_classes  =10
 
-starter_learning_rate = 0.02
+starter_learning_rate = 0.03
 
 decay_after = 15  # epoch after which to begin learning rate decay
 
@@ -235,7 +235,8 @@ def encoder(images, noise_std):
     z = control_flow_ops.cond(training, training_batch_norm, eval_batch_norm)
     if l == C:
       # use softmax activation in output layer
-      h = tf.nn.sigmoid(weights['gamma'][l-1] * (tf.squeeze(z,squeeze_dims=[1,2]) + weights["beta"][l-1]))
+      logits = weights['gamma'][l-1] * (tf.squeeze(z,squeeze_dims=[1,2]) + weights["beta"][l-1])
+      h = tf.nn.sigmoid(logits)
       h = tf.expand_dims(tf.expand_dims(h,dim=1),dim=2)
     else:
       # use ReLU activation in hidden layers
@@ -243,13 +244,13 @@ def encoder(images, noise_std):
     d['labeled']['z'][l], d['unlabeled']['z'][l] = split_lu(z)
     d['unlabeled']['m'][l], d['unlabeled']['v'][l] = m, v  # save mean and variance of unlabeled examples for decoding
   d['labeled']['h'][l], d['unlabeled']['h'][l] = split_lu(h)
-  return h, d
+  return h, d, logits
 
 print ("=== Corrupted Encoder ===")
-y_c, corrupted = encoder(images, noise_std)
+y_c, corrupted, logits = encoder(images, noise_std)
 
 print ("=== Clean Encoder ===")
-y, clean = encoder(images, 0.0)  # 0.0 -> do not add noise
+y, clean, _ = encoder(images, 0.0)  # 0.0 -> do not add noise
 
 print ("=== Decoder ===")
 
@@ -291,7 +292,6 @@ for l in range(C, -1, -1):
   else:
     u = tf.nn.conv2d_transpose(z_est[l+1], weights['V'][l], tf.stack([tf.shape(z_est[l+1])[0], height_map_sizes[l], width_map_sizes[l], channel_sizes[l]]),strides=[1, 1, 1, 1], padding='VALID',name = 'CT'+str(l))
   u = batch_normalization(u)
-  print(z_c, u, channel_sizes[l])
   z_est[l] = g_gauss(z_c, u, channel_sizes[l])
   z_est_bn = (z_est[l] - m) / v
   # append the cost of this layer to d_cost
@@ -300,19 +300,20 @@ for l in range(C, -1, -1):
 # calculate total unsupervised cost by adding the denoising cost of all layers
 u_cost = tf.add_n(d_cost)
 
-y_N = labeled(y_c)
-
+# y_N = labeled(logits)
+y_N = labeled2(logits)
 #Convert y* back to 2D Tensor
 # y_N = tf.squeeze(y_N, squeeze_dims=[1,2])
 y = tf.squeeze(y, squeeze_dims=[1,2])
 
 # s_cost = -tf.reduce_mean(tf.reduce_sum(outputs*tf.log(y_N), 1))  # supervised cost
-s_cost = -tf.reduce_mean(tf.nn. sigmoid_cross_entropy_with_logits(logits=outputs, labels=y_N))
+s_cost = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_N, labels=outputs))
 # s_cost = tf.keras.backend.binary_crossentropy()
 loss = s_cost + u_cost  # total cost
 
 #pred_cost = -tf.reduce_mean(tf.reduce_sum(outputs*tf.log(y), 1))  # cost used for prediction
-correct_prediction = tf.equal(tf.argmax(labeled2(y), 1), tf.argmax(outputs, 1))  # no of correct predictions
+# correct_prediction = tf.equal(tf.argmax(labeled2(y), 1), tf.argmax(outputs, 1))  # no of correct predictions
+correct_prediction = tf.equal(tf.round(y_N), outputs)
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float")) * tf.constant(100.0)
 
 learning_rate = tf.Variable(starter_learning_rate, trainable=False)
