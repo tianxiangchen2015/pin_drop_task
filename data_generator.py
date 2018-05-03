@@ -86,15 +86,24 @@ class DataGenerator():
             cur_index = self.test_index
             audio_files = self.test_fns
             labels = self.test_labels
+
+        strong_labels = []
+
+        for i in range(cur_index, cur_index + self.batch_size):
+            l = np.array([labels[i], ] * 499)
+            strong_labels.append(l)
+
         X_labels = labels[cur_index: cur_index+self.batch_size]
         filenames = audio_files[cur_index: cur_index+self.batch_size]
         X_data = self.gen_spectrogram(filenames)
 
-        outputs = np.vstack(X_labels)
+        outputs_weak = np.vstack(X_labels)
+        outputs_strong = np.array(strong_labels)
+
         # inputs = np.vstack(X_data)
         inputs = X_data
 
-        return (inputs, outputs)
+        return (inputs, [outputs_weak, outputs_strong])
     
     def next_train(self):
         while True:
@@ -185,6 +194,7 @@ class AudioGenerator():
 
         outputs = np.vstack(X_labels)
         inputs = X_data
+
 
         self.train_index += self.batch_size
         if self.train_index > len(self.train_labels) - self.batch_size:

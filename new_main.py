@@ -5,7 +5,7 @@ from keras import metrics
 from keras.models import Model, load_model
 from keras.layers import (Input, Dense, BatchNormalization, Dropout, Lambda,
                           Activation, Concatenate, Conv2D, MaxPooling2D, Reshape, 
-                          TimeDistributed, Flatten, Bidirectional, LSTM)
+                          TimeDistributed, Flatten, Bidirectional, LSTM, GRU)
 from keras.initializers import lecun_normal
 import numpy as np
 from data_generator import DataGenerator
@@ -64,8 +64,9 @@ def pooling_shape(input_shape):
     return (sample_num, freq_bins)
 
 
+
 classes_num = 10
-drop_rate = 0.2
+dropout_rate = 0.25
 
 l, Sxx = audio_gen.rnd_one_sample()
 
@@ -88,15 +89,23 @@ cnn = Activation('relu')(cnn)
 cnn = MaxPooling2D((1, 2))(cnn)
 cnn = Reshape((499,64))(cnn)
 
-bi_lstm = Bidirectional(LSTM(128, return_sequences=True))(cnn)
-bi_lstm = Bidirectional(LSTM(128, return_sequences=True))(bi_lstm)
-dense_a = TimeDistributed(Dense(17, activation='relu'))(bi_lstm)
-dense_a = TimeDistributed(Dense(17, activation='sigmoid'))(dense_a)
-#dense_a = Dropout(drop_rate)(dense_a)
-flat = Flatten()(dense_a)
-output_layer = Dense(classes_num, activation='sigmoid')(flat)
+bi_gru = Bidirectional(GRU(128, activation='tanh', dropout=dropout_rate, recurrent_dropout=dropout_rate,return_sequences=True))(cnn)
+bi_gru = Bidirectional(GRU(128, activation='tanh', dropout=dropout_rate, recurrent_dropout=dropout_rate,return_sequences=True))(bi_gru)
+dense_a = TimeDistributed(Dense(10, activation='relu'))(bi_gru)
+dense_a = Dropout(rate=dropout_rate)(dense_a)
+dense_a = TimeDistributed(Dense(10, activation='sigmoid'))(dense_a)
 
-model = Model(inputs=input_layer, outputs=output_layer)
+# Weak output path
+weak_dense_a = TimeDistributed(Dense(1, activation='sigmoid'))(dense_a)
+flat = Flatten()(weak_dense_a)
+weak_dense_b = Dense(32, activation='linear')(flat)
+Dropout(rate=dropout_rate)
+weak_out = Dense(classes_num, activation='sigmoid')(weak_dense_b)
+
+# Strong output path
+strong_out = TimeDistributed(Dense(10, activation='sigmoid'))(dense_a)
+
+model = Model(inputs=input_layer, outputs=[weak_out, strong_out])
 print (model.summary())
 
 
@@ -130,8 +139,8 @@ print (model.summary())
 '''
 
 opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
-model.compile(optimizer=opt,
-                  loss=losses.binary_crossentropy, metrics=[metrics.binary_crossentropy])
+model.compile(optimizer=opt, loss=[losses.binary_crossentropy, losses.binary_crossentropy],
+              loss_weights=[0.9, 0.1], metrics=['accuracy'])
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
                           epochs=20, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
