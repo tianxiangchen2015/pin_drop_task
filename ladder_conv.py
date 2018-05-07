@@ -6,6 +6,8 @@ import tensorflow as tf
 from tensorflow.python.ops import control_flow_ops
 import math
 import os
+from dcase_util.data import ProbabilityEncoder
+# from evaluation_measures import get_f_measure_tf
 import csv
 #import matplotlib.pyplot as plt
 
@@ -74,7 +76,7 @@ y_test_one_hot = mlb.transform(test_labels)
 semi_gen = SemiDataGenerator(labeled_data=[y_train_one_hot, X_train_fn], unlabeled_data=[train_labels_u, train_fns_u], batch_size=batch_size)
 # Validation generator
 valid_gen = AudioGenerator(labels=y_test_one_hot, fns=X_test_fns)
-print(valid_gen.get_next()[0].shape)
+validation_steps = valid_gen.get_train_test_num() // batch_size
 
 channel_sizes = [1,64,64,64,10]  #Last layer will by fully conv
 denoising_cost =10* np.array([10.0, 10.0, 10.0,0.1, 0.10])
@@ -353,6 +355,7 @@ print ("=== Training ===")
 acc_ma = 0.0
 s_cost_ma = 0.0
 u_cost_ma = 0.0
+probabilities = tf.nn.sigmoid(outputs)
 for i in range(i_iter, num_iter):
   images, labels = semi_gen.next_batch()
   result = sess.run([train_step,accuracy,s_cost,u_cost], feed_dict={inputs: images, outputs: labels, training: True})
@@ -365,16 +368,58 @@ for i in range(i_iter, num_iter):
     epoch_n = i/(num_examples/batch_size)
     if (epoch_n+1) >= decay_after:
       # decay learning rate
-      # learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
+      learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
       ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
       ratio = max(0, ratio / (num_epochs - decay_after))
       sess.run(learning_rate.assign(starter_learning_rate * ratio))
     if logsave: saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
     fetch = [accuracy,s_cost,u_cost]
     if vis: fetch += [corrupted['unlabeled']['z'][0],z_est[0]]
-    images_val, labels_val = valid_gen.get_next()
-    result = sess.run(fetch, feed_dict={inputs: images_val, outputs:labels_val, training: False})
-    print("At %5.0f of %5.0f acc %5.1f(%5.1f) cost super %6.2f(%6.2f) unsuper %6.2f(%6.2f)"%(i,num_iter,result[0],acc_ma,result[1],s_cost_ma,result[2],u_cost_ma))
+    # images_val, labels_val = valid_gen.get_all()
+    # print(get_f_measure_tf(sess))
+
+    # prob = sess.run(probabilities, feed_dict={inputs: images_val, outputs:labels_val, training: False})
+    # print(prob.shape)
+
+    TP = np.zeros(num_classes)
+    TN = np.zeros(num_classes)
+    FP = np.zeros(num_classes)
+    FN = np.zeros(num_classes)
+    for counter, (X, y) in enumerate(valid_gen):
+      if counter == validation_steps:
+        break
+      predictions = sess.run(probabilities, feed_dict={inputs: X, outputs: y, training: False})
+
+      if len(predictions.shape) == 3:
+            # average data to have weak labels
+        predictions = np.mean(predictions, axis=1)
+        y = np.mean(y, axis=1)
+
+      thresholds=None
+      if thresholds is None:
+        binarization_type = 'global_threshold'
+        thresh = 0.2
+      else:
+          binarization_type = "class_threshold"
+          assert type(thresholds) is list
+          thresh = thresholds
+
+      predictions = ProbabilityEncoder().binarization(predictions,
+                                                        binarization_type=binarization_type,
+                                                        threshold=thresh,
+                                                        time_axis=0
+                                                        )
+
+      TP += (predictions + y[0] == 2).sum(axis=0)
+      FP += (predictions - y[0] == 1).sum(axis=0)
+      FN += (y[0] - predictions == 1).sum(axis=0)
+      TN += (predictions + y[0] == 0).sum(axis=0)
+
+      macro_f_measure = np.zeros(num_classes)
+      mask_f_score = 2 * TP + FP + FN != 0
+      macro_f_measure[mask_f_score] = 2 * TP[mask_f_score] / (2 * TP + FP + FN)[mask_f_score]
+      print(macro_f_measure, np.mean(macro_f_measure))
+    # print("At %5.0f of %5.0f acc %5.1f(%5.1f) cost super %6.2f(%6.2f) unsuper %6.2f(%6.2f)"%(i,num_iter,result[0],acc_ma,result[1],s_cost_ma,result[2],u_cost_ma))
 
     #Visualize
     # if vis and i%100 == 0:
