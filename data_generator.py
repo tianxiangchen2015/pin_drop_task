@@ -103,7 +103,8 @@ class DataGenerator():
         # inputs = np.vstack(X_data)
         inputs = X_data
 
-        return (inputs, [outputs_weak, outputs_strong])
+        #return (inputs, [outputs_weak, outputs_strong])
+        return inputs, outputs_weak
     
     def next_train(self):
         while True:
@@ -219,7 +220,7 @@ class AudioGenerator():
         return self.train_labels, Sxx
 
     def get_train_test_num(self):
-        return len(self.train_labels), len(self.train_labels)
+        return len(self.train_labels)
 
 
 class SemiDataGenerator():

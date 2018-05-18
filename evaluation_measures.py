@@ -34,12 +34,14 @@ def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=No
 
         if thresholds is None:
             binarization_type = 'global_threshold'
-            thresh = 0.5
+            thresh = 0.2
         else:
-            binarization_type = "class_threshold"
-            assert type(thresholds) is list
-            thresh = thresholds
-
+            if type(thresholds) is list:
+                thresh = thresholds
+                binarization_type = "class_threshold"
+            else:
+                binarization_type = "global_threshold"
+                thresh = thresholds
         predictions = ProbabilityEncoder().binarization(predictions,
                                                         binarization_type=binarization_type,
                                                         threshold=thresh,
@@ -55,4 +57,4 @@ def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=No
     mask_f_score = 2*TP + FP + FN != 0
     macro_f_measure[mask_f_score] = 2*TP[mask_f_score] / (2*TP + FP + FN)[mask_f_score]
 
-    return macro_f_measure
+    return numpy.mean(macro_f_measure)

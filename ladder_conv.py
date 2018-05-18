@@ -363,17 +363,17 @@ for i in range(i_iter, num_iter):
   s_cost_ma = 0.8*s_cost_ma+0.2*result[2]
   u_cost_ma = 0.8*u_cost_ma+0.2*result[3]
 
-#  print(debug)
   if (i > 1) and i%10 == 0:  #((i+1) % (num_iter/num_epochs) == 0)
-    epoch_n = i/(num_examples/batch_size)
+  # if ((i+1) % (num_iter/num_epochs) == 0):
+    epoch_n = i//(num_examples//batch_size)
     if (epoch_n+1) >= decay_after:
       # decay learning rate
-      learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
+      #learning_rate = starter_learning_rate * ((num_epochs - epoch_n) / (num_epochs - decay_after))
       ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
       ratio = max(0, ratio / (num_epochs - decay_after))
       sess.run(learning_rate.assign(starter_learning_rate * ratio))
     if logsave: saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
-    fetch = [accuracy,s_cost,u_cost]
+    # fetch = [accuracy,s_cost,u_cost]
     if vis: fetch += [corrupted['unlabeled']['z'][0],z_est[0]]
     # images_val, labels_val = valid_gen.get_all()
     # print(get_f_measure_tf(sess))
@@ -385,9 +385,8 @@ for i in range(i_iter, num_iter):
     TN = np.zeros(num_classes)
     FP = np.zeros(num_classes)
     FN = np.zeros(num_classes)
-    for counter, (X, y) in enumerate(valid_gen):
-      if counter == validation_steps:
-        break
+    for i in range(validation_steps):
+      X, y = valid_gen.get_next()
       predictions = sess.run(probabilities, feed_dict={inputs: X, outputs: y, training: False})
 
       if len(predictions.shape) == 3:
@@ -398,7 +397,7 @@ for i in range(i_iter, num_iter):
       thresholds=None
       if thresholds is None:
         binarization_type = 'global_threshold'
-        thresh = 0.2
+        thresh = 0.5
       else:
           binarization_type = "class_threshold"
           assert type(thresholds) is list
@@ -418,7 +417,7 @@ for i in range(i_iter, num_iter):
       macro_f_measure = np.zeros(num_classes)
       mask_f_score = 2 * TP + FP + FN != 0
       macro_f_measure[mask_f_score] = 2 * TP[mask_f_score] / (2 * TP + FP + FN)[mask_f_score]
-      print(macro_f_measure, np.mean(macro_f_measure))
+    print(macro_f_measure, np.mean(macro_f_measure))
     # print("At %5.0f of %5.0f acc %5.1f(%5.1f) cost super %6.2f(%6.2f) unsuper %6.2f(%6.2f)"%(i,num_iter,result[0],acc_ma,result[1],s_cost_ma,result[2],u_cost_ma))
 
     #Visualize
