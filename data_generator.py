@@ -177,7 +177,7 @@ class AudioGenerator():
             elif wav.shape[0] > 441000:
                 wav = wav[0:441000]
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
-            x_data.append(Sxx.reshape(1, Sxx.shape[0]*Sxx.shape[1]))
+            x_data.append(Sxx.reshape(1, Sxx.shape[0], Sxx.shape[1], 1))
 
         return np.vstack(x_data)
 
@@ -198,11 +198,11 @@ class AudioGenerator():
 
 
         self.train_index += self.batch_size
-        if self.train_index > len(self.train_labels) - self.batch_size:
-            self.train_index = 0
-            self.shuffle_data_by_partition()
+        #if self.train_index > len(self.train_labels) - self.batch_size:
+        #    self.train_index = 0
+        #    self.shuffle_data_by_partition()
 
-        return (inputs, outputs)
+        return inputs, outputs
 
     def next_train(self):
         while True:
@@ -211,7 +211,7 @@ class AudioGenerator():
             if self.train_index > len(self.train_labels) - self.batch_size:
                 self.train_index = 0
                 self.shuffle_data_by_partition()
-            return ret
+            yield ret
 
     def rnd_one_sample(self):
 
