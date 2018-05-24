@@ -82,7 +82,7 @@ opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
 #              loss_weights=[0.5, 0.5])
 model.compile(optimizer='Adam', loss=losses.binary_crossentropy)
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
-                          epochs=20, validation_data=valid_gen.next_train(), validation_steps=validation_step)
+                          epochs=60, validation_data=valid_gen.next_train(), validation_steps=validation_step)
 model.save('models/event_detect_attention_4.h5')
 
 

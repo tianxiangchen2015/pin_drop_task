@@ -5,6 +5,7 @@ import librosa
 import scipy.io.wavfile as wavfiles
 from scipy.signal import spectrogram
 from python_speech_features import mfcc, logfbank
+import librosa
 #from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 #from tensorflow.python.ops import io_ops
 
@@ -43,7 +44,7 @@ class DataGenerator():
         """
         x_data = []
         for filename in filenames:
-            fs, wav = wavfiles.read(filename)
+            wav, fs = librosa.load(filename, sr=None)
             # print(wav.shape, filename)
             if len(wav.shape) > 1:
                 wav = wav[:,0]
@@ -55,6 +56,30 @@ class DataGenerator():
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
             x_data.append(Sxx.reshape(1, Sxx.shape[0], Sxx.shape[1], 1))
             
+        return np.vstack(x_data)
+     
+    def gen_delta_delta(self, filenames):
+        """ For a given audio clip, calculate the corresponding feature
+        Params:
+            audio_clip (str): Path to the audio clip
+        """
+        x_data = []
+        for filename in filenames:
+            fs, wav = wavfiles.read(filename)
+            # print(wav.shape, filename)
+            if len(wav.shape) > 1:
+                wav = wav[:,0]
+            if wav.shape[0] < 441000:
+                pad_with = 441000 - wav.shape[0]
+                wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
+            elif wav.shape[0] > 441000:
+                wav = wav[0:441000]
+            Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            delta = librosa.feature.delta(Sxx, order=1)
+            delta_2 = librosa.feature.delta(Sxx, order=2)
+            data = np.dstack((Sxx, delta, delta_2))
+            x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
+
         return np.vstack(x_data)
     
     def train_valid_split(self):
@@ -95,13 +120,12 @@ class DataGenerator():
 
         X_labels = labels[cur_index: cur_index+self.batch_size]
         filenames = audio_files[cur_index: cur_index+self.batch_size]
-        X_data = self.gen_spectrogram(filenames)
-
+        # X_data = self.gen_spectrogram(filenames)
+        # inputs = np.vstack(X_data)
+        X_data = self.gen_delta_delta(filenames)
+        inputs = X_data
         outputs_weak = np.vstack(X_labels)
         outputs_strong = np.array(strong_labels)
-
-        # inputs = np.vstack(X_data)
-        inputs = X_data
 
         #return (inputs, [outputs_weak, outputs_strong])
         return inputs, outputs_weak

@@ -16,7 +16,7 @@ config.gpu_options.allow_growth=True
 sess = tf.Session(config=config)
 
 from utils import load_train_weak
-from train_utils import base_model_1, benchmark_model
+from train_utils import base_model_1, benchmark_model, base_model_2
 from sklearn.preprocessing import MultiLabelBinarizer
 mlb = MultiLabelBinarizer()
 
@@ -39,7 +39,8 @@ validation_step = num_test // batch_size
 image_shape = Sxx.shape
 print(image_shape)
 # Attention CNN
-model = benchmark_model(image_shape, classes_num, dropout_rate)
+# model = base_model_1(image_shape, classes_num, dropout_rate)
+model = base_model_2(image_shape, classes_num, dropout_rate)
 print (model.summary())
 
 
@@ -48,13 +49,13 @@ opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
 #              loss_weights=[0.5, 0.5])
 model.compile(optimizer='Adam', loss=losses.binary_crossentropy)
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
-                          epochs=40, validation_data=audio_gen.next_test(), validation_steps=validation_step,
+                          epochs=60, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
-model.save('models/model_2018.h5')
+model.save('models/model_3_channel.h5')
 
 
 
-model = load_model('models/model_2018.h5')
+model = load_model('models/model_3_channel.h5')
 # X_test, y_test = audio_gen.next_test()
 
 from evaluation_measures import get_f_measure_by_class
