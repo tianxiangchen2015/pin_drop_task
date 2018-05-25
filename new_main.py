@@ -24,7 +24,7 @@ X_train_fn, y_train = load_train_weak()
 y_train_one_hot = mlb.fit_transform(y_train)
 batch_size = 32
 # Create audio generator
-audio_gen = DataGenerator(data_list=(X_train_fn, y_train_one_hot))
+audio_gen = DataGenerator(data_list=(X_train_fn, y_train_one_hot), mode=2)
 
 
 classes_num = 10
@@ -44,18 +44,18 @@ model = base_model_2(image_shape, classes_num, dropout_rate)
 print (model.summary())
 
 
-opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
+# opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
 #model.compile(optimizer='Adam', loss=[losses.binary_crossentropy, losses.binary_crossentropy],
 #              loss_weights=[0.5, 0.5])
 model.compile(optimizer='Adam', loss=losses.binary_crossentropy)
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
                           epochs=60, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
-model.save('models/model_3_channel.h5')
+model.save('models/base_model_2.h5')
 
 
 
-model = load_model('models/model_3_channel.h5')
+model = load_model('models/base_model_2_mode_2.h5')
 # X_test, y_test = audio_gen.next_test()
 
 from evaluation_measures import get_f_measure_by_class

@@ -88,7 +88,7 @@ def model_attention_applied_before_lstm():
 
 
 def base_model_1(image_shape, classes_num, dropout_rate):
-    input_layer = Input(shape=(image_shape[1], image_shape[2], 3))
+    input_layer = Input(shape=(image_shape[1], image_shape[2], image_shape[3]))
     cnn = Conv2D(128, (3, 3), padding='valid')(input_layer)
     cnn = Activation('relu')(cnn)
     #cnn = MaxPooling2D((1, 4))(cnn)
@@ -147,24 +147,24 @@ def benchmark_model(image_shape, classes_num, dropout_rate):
 
 def base_model_2(image_shape, classes_num, dropout_rate):
 
-    input_layer = Input(shape=(image_shape[1], image_shape[2], 3))
-    cnn = Conv2D(128, (3, 3), padding='same')(input_layer)
+    input_layer = Input(shape=(image_shape[1], image_shape[2], image_shape[3]))
+    cnn = Conv2D(64, (3, 3), padding='same')(input_layer)
     cnn = Activation('relu')(cnn)
     cnn = MaxPooling2D((1, 2))(cnn)
-    cnn = Conv2D(128, (3, 3), padding='same')(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
     cnn = Activation('relu')(cnn)
     cnn = MaxPooling2D((1, 2))(cnn)
-    cnn = Conv2D(128, (3, 3), padding='same')(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
     cnn = Activation('relu')(cnn)
     cnn = MaxPooling2D((1, 2))(cnn)
     
     #cnn = Conv2D(10, (493, 34), padding='valid')(cnn)
     #cnn = Activation('relu')(cnn)
-    res_cnn = Reshape((499,5*128))(cnn)
-    bi_gru = LSTM(512, recurrent_dropout=dropout_rate,return_sequences=True)(res_cnn)
+    res_cnn = Reshape((499,5*64))(cnn)
+    bi_gru = LSTM(256, recurrent_dropout=dropout_rate,return_sequences=True)(res_cnn)
     attention_mul = attention_3d_block(bi_gru)
     attention_mul = Flatten()(attention_mul)
-    dense_a = Dense(512, activation='relu')(attention_mul)
+    dense_a = Dense(256, activation='relu')(attention_mul)
     #dense_a = Lambda(global_average_pooling,output_shape=global_average_pooling_shape)(cnn)
     dense_b = Dense(256, activation='relu')(dense_a)
     b1 = BatchNormalization()(dense_b)
