@@ -1,13 +1,11 @@
 import numpy as np 
-import random
 import librosa
-# import webrtcvad
 import scipy.io.wavfile as wavfiles
 from scipy.signal import spectrogram
-from python_speech_features import mfcc, logfbank
+from python_speech_features import logfbank
 from scipy import ndimage
-#from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
-#from tensorflow.python.ops import io_ops
+import gammatone.gtgram
+
 
 
 def shuffle_data(labels, fns, rnd_seed=None):
@@ -30,6 +28,19 @@ class DataGenerator():
         self.mode = mode
         self.num_classes = 10
         self.train_labels, self.train_fns, self.test_labels, self.test_fns = self.train_valid_split()
+
+
+    def gen_feture(self, filenames):
+        if self.mode == 1:
+            x_data = self.gen_spectrogram(filenames)
+        elif self.mode == 2:
+            x_data = self.gen_delta_delta(filenames)
+        elif self.mode == 3:
+            x_data = self.gen_filtered_spec(filenames)
+        elif self.mode == 4:
+            x_data = self.gen_gamatone(filenames)
+
+        return x_data
 
     def gen_spectrogram(self, filenames):
         x_data = []
@@ -87,8 +98,24 @@ class DataGenerator():
             data = np.dstack((Sxx, delta, delta_2))
             x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
 
-        return np.vstack(x_data)    
-    
+        return np.vstack(x_data)
+
+    def gen_gamatone(self, filenames):
+        x_data = []
+        for filename in filenames:
+            fs, wav = wavfiles.read(filename)
+            # print(wav.shape, filename)
+            if len(wav.shape) > 1:
+                wav = wav[:, 0]
+            if wav.shape[0] < 441000:
+                pad_with = 441000 - wav.shape[0]
+                wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
+            elif wav.shape[0] > 441000:
+                wav = wav[0:441000]
+            gtg = gammatone.gtgram(x=wav, fs=fs, window_time=0.04, hop_time=0.02, channels=2048, f_max=22050)
+
+            return gtg
+
     def train_valid_split(self):
         
         fns, labels = self.data_list
