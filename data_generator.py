@@ -40,6 +40,7 @@ class DataGenerator():
         elif self.mode == 4:
             x_data = self.gen_gamatone(filenames)
 
+
         return x_data
 
     def gen_spectrogram(self, filenames):
@@ -112,9 +113,13 @@ class DataGenerator():
                 wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
             elif wav.shape[0] > 441000:
                 wav = wav[0:441000]
-            gtg = gammatone.gtgram(x=wav, fs=fs, window_time=0.04, hop_time=0.02, channels=2048, f_max=22050)
+            gtg = gammatone.gtgram(x=wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50)
+            delta = librosa.feature.delta(gtg, order=1)
+            delta_2 = librosa.feature.delta(gtg, order=2)
+            data = np.dstack((gtg, delta, delta_2))
+            x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
 
-            return gtg
+        return np.vstack(x_data)
 
     def train_valid_split(self):
         
