@@ -198,12 +198,7 @@ class DataGenerator():
     def rnd_one_sample(self):
 
         rnd = np.random.choice(len(self.test_labels), 1)[0]
-        if self.mode == 1:
-            Sxx = self.gen_spectrogram([self.test_fns[rnd]])
-        elif self.mode == 2:
-            Sxx = self.gen_delta_delta([self.test_fns[rnd]])
-        else:
-            Sxx = self.gen_filtered_spec([self.test_fns[rnd]])
+        Sxx = self.gen_feature([self.test_fns[rnd]])
         return self.test_labels, Sxx
 
     def get_train_test_num(self):
