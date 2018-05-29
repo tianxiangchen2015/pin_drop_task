@@ -30,7 +30,7 @@ class DataGenerator():
         self.train_labels, self.train_fns, self.test_labels, self.test_fns = self.train_valid_split()
 
 
-    def gen_feture(self, filenames):
+    def gen_feature(self, filenames):
         if self.mode == 1:
             x_data = self.gen_spectrogram(filenames)
         elif self.mode == 2:
@@ -162,12 +162,7 @@ class DataGenerator():
 
         X_labels = labels[cur_index: cur_index+self.batch_size]
         filenames = audio_files[cur_index: cur_index+self.batch_size]
-        if self.mode == 1:
-            X_data = self.gen_spectrogram(filenames)
-        elif self.mode == 2:
-            X_data = self.gen_delta_delta(filenames)
-        else:
-            X_data = self.gen_filtered_spec(filenames)
+        X_data = self.gen_feature(filenames)
         inputs = X_data
         outputs_weak = np.vstack(X_labels)
         outputs_strong = np.array(strong_labels)
