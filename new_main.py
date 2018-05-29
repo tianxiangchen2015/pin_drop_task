@@ -23,8 +23,9 @@ mlb = MultiLabelBinarizer()
 X_train_fn, y_train = load_train_weak()
 y_train_one_hot = mlb.fit_transform(y_train)
 batch_size = 32
+mode=2
 # Create audio generator
-audio_gen = DataGenerator(data_list=(X_train_fn, y_train_one_hot), mode=2)
+audio_gen = DataGenerator(data_list=(X_train_fn, y_train_one_hot), mode=mode)
 
 
 classes_num = 10
@@ -51,7 +52,8 @@ model.compile(optimizer='Adam', loss=losses.binary_crossentropy)
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
                           epochs=60, validation_data=audio_gen.next_test(), validation_steps=validation_step,
                           verbose=1)
-model.save('models/base_model_2.h5')
+print ("mode %d" % mode)
+model.save('models/base_model_2_mode_2.h5')
 
 
 

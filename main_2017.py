@@ -56,11 +56,11 @@ for item in y_test:
     y_int_test.append(int_label)
 y_test_one_hot = mlb.fit_transform(y_int_test)
 
-
+mode=2
 batch_size = 32
 # Create audio generator
-audio_gen = AudioGenerator(batch_size=batch_size, fns=X_train_fn, labels=y_train_one_hot, mode=2)
-valid_gen = AudioGenerator(batch_size=batch_size, fns=X_test_fn, labels=y_test_one_hot, mode=2)
+audio_gen = AudioGenerator(batch_size=batch_size, fns=X_train_fn, labels=y_train_one_hot, mode=mode)
+valid_gen = AudioGenerator(batch_size=batch_size, fns=X_test_fn, labels=y_test_one_hot, mode=mode)
 l, Sxx = audio_gen.rnd_one_sample()
 
 num_train = audio_gen.get_train_test_num()
@@ -75,7 +75,7 @@ print(image_shape)
 # Attention CNN
 model = base_model_1(image_shape, classes_num, dropout_rate)
 print (model.summary())
-
+print ('mode: %d' % mode)
 
 # opt = optimizers.Adadelta(lr=1.0, rho=0.95, epsilon=1e-08, decay=1e-4)
 #model.compile(optimizer='Adam', loss=[losses.binary_crossentropy, losses.binary_crossentropy],
@@ -83,15 +83,15 @@ print (model.summary())
 model.compile(optimizer='Adam', loss=losses.binary_crossentropy)
 model.fit_generator(generator=audio_gen.next_train(), steps_per_epoch=step_per_epoch,
                           epochs=40, validation_data=valid_gen.next_train(), validation_steps=validation_step)
-model.save('models/attention_base_model_1_delta.h5')
+model.save('models/base_model_1_mode_2_2017.h5')
+print ('mode: %d' % mode)
 
 
-
-model = load_model('models/attention_base_model_1_delta.h5')
+model = load_model('models/base_model_1_mode_2_2017.h5')
 # X_test, y_test = audio_gen.next_test()
 print "finish loading model"
 from evaluation_measures import get_f_measure_by_class
 
-macro_f_measure = get_f_measure_by_class(model, classes_num, valid_gen.next_train(), validation_step, thresholds=0.5)
+macro_f_measure = get_f_measure_by_class(model, classes_num, valid_gen.next_train(), validation_step, thresholds=0.2)
 print(macro_f_measure)
 

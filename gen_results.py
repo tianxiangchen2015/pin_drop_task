@@ -55,7 +55,7 @@ num_test = valid_gen.get_train_test_num()
 validation_step = num_test // batch_size
 
 
-model = load_model('models/event_detect_attention_3.h5')
+model = load_model('models/event_detect_attention_4.h5')
 print model.summary()
 # X_test, y_test = audio_gen.next_test()
 print "finish loading model"
