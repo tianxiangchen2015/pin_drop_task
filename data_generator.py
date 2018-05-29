@@ -4,8 +4,7 @@ import scipy.io.wavfile as wavfiles
 from scipy.signal import spectrogram
 from python_speech_features import logfbank
 from scipy import ndimage
-import gammatone.gtgram
-
+from gammatone.gtgram import gtgram
 
 
 def shuffle_data(labels, fns, rnd_seed=None):
@@ -194,7 +193,7 @@ class DataGenerator():
         texts = np.argmax(self.test_labels, axis=1)
 
         return features, texts
-   
+
     def rnd_one_sample(self):
 
         rnd = np.random.choice(len(self.test_labels), 1)[0]
