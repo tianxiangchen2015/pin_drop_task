@@ -112,7 +112,7 @@ class DataGenerator():
                 wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
             elif wav.shape[0] > 441000:
                 wav = wav[0:441000]
-            gtg = gtgram(x=wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50)
+            gtg = gtgram(wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50)
             delta = librosa.feature.delta(gtg, order=1)
             delta_2 = librosa.feature.delta(gtg, order=2)
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
