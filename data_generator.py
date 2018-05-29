@@ -116,7 +116,10 @@ class DataGenerator():
             gtg = gammatone.gtgram(x=wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50)
             delta = librosa.feature.delta(gtg, order=1)
             delta_2 = librosa.feature.delta(gtg, order=2)
-            data = np.dstack((gtg, delta, delta_2))
+            Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            Sxx_delta = librosa.feature.delta(Sxx, order=1)
+            Sxx_delta_2 = librosa.feature.delta(Sxx, order=2)
+            data = np.dstack((gtg, delta, delta_2, Sxx, Sxx_delta, Sxx_delta_2))
             x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
 
         return np.vstack(x_data)
