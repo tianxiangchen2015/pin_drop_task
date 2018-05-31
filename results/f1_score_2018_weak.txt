@@ -1,0 +1,2 @@
+model name: base_model_4 mode: 1 f1: 0.510259
+model name: base_model_5 mode: 1 f1: 0.318670
