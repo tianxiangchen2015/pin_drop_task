@@ -25,6 +25,7 @@ class DataGenerator():
         self.batch_size = batch_size
         self.data_list = data_list
         self.mode = mode
+        self.feat_path = 'audio/gammatone_feat/train/'
         self.num_classes = 10
         self.train_labels, self.train_fns, self.test_labels, self.test_fns = self.train_valid_split()
 
@@ -45,8 +46,7 @@ class DataGenerator():
     def gen_spectrogram(self, filenames):
         x_data = []
         for filename in filenames:
-            wav, fs = librosa.load(filename, sr=None)
-            # print(wav.shape, filename)
+            wav, fs = wavfiles.read(filename)
             if len(wav.shape) > 1:
                 wav = wav[:,0]
             if wav.shape[0] < 441000:
@@ -63,7 +63,6 @@ class DataGenerator():
         x_data = []
         for filename in filenames:
             fs, wav = wavfiles.read(filename)
-            # print(wav.shape, filename)
             if len(wav.shape) > 1:
                 wav = wav[:,0]
             if wav.shape[0] < 441000:
@@ -83,7 +82,6 @@ class DataGenerator():
         x_data = []
         for filename in filenames:
             fs, wav = wavfiles.read(filename)
-            # print(wav.shape, filename)
             if len(wav.shape) > 1:
                 wav = wav[:,0]
             if wav.shape[0] < 441000:
@@ -104,20 +102,21 @@ class DataGenerator():
         x_data = []
         for filename in filenames:
             fs, wav = wavfiles.read(filename)
-            # print(wav.shape, filename)
             if len(wav.shape) > 1:
-                wav = wav[:, 0]
+                wav = wav[:,0]
             if wav.shape[0] < 441000:
                 pad_with = 441000 - wav.shape[0]
                 wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
             elif wav.shape[0] > 441000:
                 wav = wav[0:441000]
-            gtg = gtgram(wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50).T
-            delta = librosa.feature.delta(gtg, order=1)
-            delta_2 = librosa.feature.delta(gtg, order=2)
+            kernel = [-1, 2, -1]
+            feat_name = self.feat_path + filename.split('/')[-1] + '.npy'
+            gtg = np.load(feat_name)
+            delta = ndimage.convolve1d(gtg, weights=kernel, axis=1, mode='nearest')
+            delta_2 = ndimage.convolve1d(gtg, weights=kernel, axis=0, mode='nearest')
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
-            Sxx_delta = librosa.feature.delta(Sxx, order=1)
-            Sxx_delta_2 = librosa.feature.delta(Sxx, order=2)
+            Sxx_delta = ndimage.convolve1d(Sxx, weights=kernel, axis=1, mode='nearest')
+            Sxx_delta_2 = ndimage.convolve1d(Sxx, weights=kernel, axis=0, mode='nearest')
             data = np.dstack((gtg, delta, delta_2, Sxx, Sxx_delta, Sxx_delta_2))
             x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
 
@@ -126,7 +125,7 @@ class DataGenerator():
     def train_valid_split(self):
         
         fns, labels = self.data_list
-        s_labels, s_fns = shuffle_data(labels, fns, rnd_seed=0)
+        s_labels, s_fns = shuffle_data(labels, fns)
         train_size = int(len(s_labels) * 0.7)
 #         self.train_labels = s_labels[0:train_size]
 #         self.train_fns = s_fns[0:train_size]
@@ -189,8 +188,8 @@ class DataGenerator():
     
     def get_test(self):
         self.shuffle_data_by_partition('test')
-        features = self.gen_spectrogram(self.test_fns)
-        texts = np.argmax(self.test_labels, axis=1)
+        features = self.gen_feature(self.test_fns)
+        texts = self.test_labels
 
         return features, texts
 
@@ -212,12 +211,25 @@ class AudioGenerator():
         self.train_labels = labels
         self.train_fns = fns
         self.mode = mode
+        self.feat_path = 'audio/gammatone_feat/train/'
         self.shuffle_data_by_partition()
+
+    def gen_feature(self, filenames):
+        if self.mode == 1:
+            x_data = self.gen_spectrogram(filenames)
+        elif self.mode == 2:
+            x_data = self.gen_delta_delta(filenames)
+        elif self.mode == 3:
+            x_data = self.gen_filtered_spec(filenames)
+        elif self.mode == 4:
+            x_data = self.gen_gamatone(filenames)
+
+        return x_data
 
     def gen_spectrogram(self, filenames):
         x_data = []
         for filename in filenames:
-            fs, wav = wavfiles.read(filename)
+            wav, fs = librosa.load(filename, sr=None)
             # print(wav.shape, filename)
             if len(wav.shape) > 1:
                 wav = wav[:, 0]
@@ -237,7 +249,7 @@ class AudioGenerator():
             fs, wav = wavfiles.read(filename)
             # print(wav.shape, filename)
             if len(wav.shape) > 1:
-                wav = wav[:,0]
+                wav = wav[:, 0]
             if wav.shape[0] < 441000:
                 pad_with = 441000 - wav.shape[0]
                 wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
@@ -257,7 +269,7 @@ class AudioGenerator():
             fs, wav = wavfiles.read(filename)
             # print(wav.shape, filename)
             if len(wav.shape) > 1:
-                wav = wav[:,0]
+                wav = wav[:, 0]
             if wav.shape[0] < 441000:
                 pad_with = 441000 - wav.shape[0]
                 wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
@@ -272,6 +284,31 @@ class AudioGenerator():
 
         return np.vstack(x_data)
 
+    def gen_gamatone(self, filenames):
+        x_data = []
+        for filename in filenames:
+            fs, wav = wavfiles.read(filename)
+            # print(wav.shape, filename)
+            if len(wav.shape) > 1:
+                wav = wav[:,0]
+            if wav.shape[0] < 441000:
+                pad_with = 441000 - wav.shape[0]
+                wav = np.pad(wav, (0, pad_with), 'constant', constant_values=(0))
+            elif wav.shape[0] > 441000:
+                wav = wav[0:441000]
+            kernel = [-1, 2, -1]
+            feat_name = self.feat_path + filename.split('/')[-1] + '.npy'
+            gtg = np.load(feat_name)
+            delta = ndimage.convolve1d(gtg, weights=kernel, axis=1, mode='nearest')
+            delta_2 = ndimage.convolve1d(gtg, weights=kernel, axis=0, mode='nearest')
+            Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            Sxx_delta = ndimage.convolve1d(Sxx, weights=kernel, axis=1, mode='nearest')
+            Sxx_delta_2 = ndimage.convolve1d(Sxx, weights=kernel, axis=0, mode='nearest')
+            data = np.dstack((gtg, delta, delta_2, Sxx, Sxx_delta, Sxx_delta_2))
+            x_data.append(data.reshape(1, data.shape[0], data.shape[1], data.shape[2]))
+
+        return np.vstack(x_data)
+
     def shuffle_data_by_partition(self):
         self.train_labels, self.train_fns = shuffle_data(self.train_labels, self.train_fns)
 
@@ -281,12 +318,7 @@ class AudioGenerator():
         labels = self.train_labels
         X_labels = labels[cur_index: cur_index + self.batch_size]
         filenames = audio_files[cur_index: cur_index + self.batch_size]
-        if self.mode == 1:
-            X_data = self.gen_spectrogram(filenames)
-        elif self.mode == 2:
-            X_data = self.gen_delta_delta(filenames)
-        else:
-            X_data = self.gen_filtered_spec(filenames)
+        X_data = self.gen_feature(filenames)
         outputs = np.vstack(X_labels)
         inputs = X_data
         self.train_index += self.batch_size

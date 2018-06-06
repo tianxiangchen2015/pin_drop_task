@@ -5,7 +5,7 @@ from keras import metrics
 from keras.models import Model, load_model
 from keras.layers import (Input, Dense, BatchNormalization, Dropout, Lambda,
                           Activation, Concatenate, Conv2D, MaxPooling2D, Reshape,
-                          TimeDistributed, Flatten, Bidirectional, LSTM, GRU, merge, Permute)
+                          TimeDistributed, Flatten, Bidirectional, LSTM, GRU, merge, Permute, RepeatVector)
 from keras.initializers import lecun_normal
 import numpy as np
 
@@ -66,25 +66,21 @@ def attention_3d_block(inputs):
     return output_attention_mul
 
 
-def model_attention_applied_after_lstm():
-    inputs = Input(shape=(TIME_STEPS, INPUT_DIM,))
-    lstm_units = 32
-    lstm_out = LSTM(lstm_units, return_sequences=True)(inputs)
-    attention_mul = attention_3d_block(lstm_out)
-    attention_mul = Flatten()(attention_mul)
-    output = Dense(1, activation='sigmoid')(attention_mul)
-    model = Model(input=[inputs], output=output)
-    return model
-
-
-def model_attention_applied_before_lstm():
-    inputs = Input(shape=(TIME_STEPS, INPUT_DIM,))
-    attention_mul = attention_3d_block(inputs)
-    lstm_units = 32
-    attention_mul = LSTM(lstm_units, return_sequences=False)(attention_mul)
-    output = Dense(1, activation='sigmoid')(attention_mul)
-    model = Model(input=[inputs], output=output)
-    return model
+def attention_3d_block_2(inputs):
+    '''
+    Single attention vector
+    '''
+    # inputs.shape = (batch_size, time_steps, input_dim)
+    input_dim = int(inputs.shape[2])
+    a = Permute((2, 1))(inputs)
+    # a = Reshape((input_dim, TIME_STEPS))(a) # this line is not useful. It's just to know which dimension is what.
+    a = Dense(TIME_STEPS, activation='sigmoid')(a)
+    # accross all time steps
+    a = Lambda(lambda x: K.mean(x, axis=1), name='dim_reduction')(a)
+    a = RepeatVector(input_dim)(a)
+    a_probs = Permute((2, 1), name='attention_vec')(a)
+    output_attention_mul = merge([inputs, a_probs], name='attention_mul', mode='mul')
+    return output_attention_mul
 
 
 def base_model_1(image_shape, classes_num, dropout_rate):
@@ -115,7 +111,7 @@ def base_model_1(image_shape, classes_num, dropout_rate):
     #b2 = Dropout(dropout_rate)(b2)
     output_layer = Dense(classes_num, activation='sigmoid')(b1)
     model = Model(inputs=input_layer, outputs=output_layer)
-    return model
+    return model, 'base_model_1'
 
 
 def benchmark_model(image_shape, classes_num, dropout_rate):
@@ -176,8 +172,91 @@ def base_model_2(image_shape, classes_num, dropout_rate):
     b2 = Dropout(dropout_rate)(b2)
     output_layer = Dense(classes_num, activation='sigmoid')(b2)
     model = Model(inputs=input_layer, outputs=output_layer)
-    return model
+    return model, 'base_model_2'
 
 
+def base_model_3(image_shape, classes_num, dropout_rate):
+
+    input_layer = Input(shape=(image_shape[1], image_shape[2], image_shape[3]))
+    cnn = Conv2D(64, (3, 3), padding='same')(input_layer)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    res_cnn = Reshape((499,5*64))(cnn)
+    attention_mul = attention_3d_block(res_cnn)
+    bi_gru = LSTM(256, recurrent_dropout=dropout_rate,return_sequences=False)(attention_mul)
+    dense_a = Dense(256, activation='relu')(bi_gru)
+    dense_b = Dense(256, activation='relu')(dense_a)
+    b1 = BatchNormalization()(dense_b)
+    b1 = Activation(activation='relu')(b1)
+    b1 = Dropout(dropout_rate)(b1)
+    b2 = Dense(128)(b1)
+    b2 = BatchNormalization()(b1)
+    b2 = Activation(activation='relu')(b2)
+    b2 = Dropout(dropout_rate)(b2)
+    output_layer = Dense(classes_num, activation='sigmoid')(b2)
+    model = Model(inputs=input_layer, outputs=output_layer)
+    return model, 'base_model_3'
 
 
+def base_model_4(image_shape, classes_num, dropout_rate):
+
+    input_layer = Input(shape=(image_shape[1], image_shape[2], image_shape[3]))
+    cnn = Conv2D(64, (3, 3), padding='same')(input_layer)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    cnn = Conv2D(64, (3, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    res_cnn = Reshape((499,5*64))(cnn)
+    attention_mul = attention_3d_block_2(res_cnn)
+    bi_gru = LSTM(256, recurrent_dropout=dropout_rate,return_sequences=False)(attention_mul)
+    #dense_a = Dense(256, activation='relu')(bi_gru)
+    #dense_b = Dense(256, activation='relu')(dense_a)
+    #b1 = BatchNormalization()(dense_b)
+    #b1 = Activation(activation='relu')(b1)
+    #b1 = Dropout(dropout_rate)(b1)
+    #b2 = Dense(128)(b1)
+    #b2 = BatchNormalization()(b1)
+    #b2 = Activation(activation='relu')(b2)
+    #b2 = Dropout(dropout_rate)(b2)
+    output_layer = Dense(classes_num, activation='sigmoid')(bi_gru)
+    model = Model(inputs=input_layer, outputs=output_layer)
+    return model, 'base_model_4'
+
+
+def base_model_5(image_shape, classes_num, dropout_rate):
+
+    input_layer = Input(shape=(image_shape[1], image_shape[2], image_shape[3]))
+    cnn = Conv2D(64, (5, 3), padding='same')(input_layer)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 5))(cnn)
+    cnn = Conv2D(64, (5, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 4))(cnn)
+    cnn = Conv2D(64, (5, 3), padding='same')(cnn)
+    cnn = Activation('relu')(cnn)
+    cnn = MaxPooling2D((1, 2))(cnn)
+    res_cnn = Reshape((499,64))(cnn)
+    attention_mul = attention_3d_block_2(res_cnn)
+    bi_gru = LSTM(256, recurrent_dropout=dropout_rate,return_sequences=False)(attention_mul)
+    dense_a = Dense(256, activation='relu')(bi_gru)
+    dense_b = Dense(256, activation='relu')(dense_a)
+    b1 = BatchNormalization()(dense_b)
+    b1 = Activation(activation='relu')(b1)
+    b1 = Dropout(dropout_rate)(b1)
+    b2 = Dense(128)(b1)
+    b2 = BatchNormalization()(b1)
+    b2 = Activation(activation='relu')(b2)
+    b2 = Dropout(dropout_rate)(b2)
+    output_layer = Dense(classes_num, activation='sigmoid')(b2)
+    model = Model(inputs=input_layer, outputs=output_layer)
+    return model, 'base_model_5'

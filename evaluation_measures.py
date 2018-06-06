@@ -1,6 +1,7 @@
 from dcase_util.data import ProbabilityEncoder
 import sed_eval
 import numpy
+from sklearn.metrics import f1_score
 
 
 def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=None):
@@ -58,3 +59,24 @@ def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=No
     macro_f_measure[mask_f_score] = 2*TP[mask_f_score] / (2*TP + FP + FN)[mask_f_score]
 
     return numpy.mean(macro_f_measure)
+
+
+def select_threshold(y_pred, y_true):
+    best_threshold = []
+    grid = numpy.arange(0.0, 0.5, 0.01)
+    grid_2 = [0.1, 0.2, 0.3, 0.4, 0.5]
+    for i in range(10):
+        y_p = y_pred[:, i]
+        y_t = y_true[:, i]
+        f1_max = 0
+        j_max = 0
+        for j in grid:
+            y_p_c = numpy.zeros(y_p.shape)
+            y_p_c[numpy.where(y_p >= j)] = 1
+            f1 = f1_score(y_t, y_p_c, 'binary')
+            if f1 >= f1_max:
+                f1_max = f1
+                j_max = j
+        best_threshold.append(j_max)
+    return best_threshold
+

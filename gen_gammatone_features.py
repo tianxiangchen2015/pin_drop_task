@@ -5,12 +5,14 @@ from utils import load_train_weak
 from multiprocessing import Pool
 from functools import partial
 import pandas as pd
+from utils import load_validation_data
 
 
-def gen_gamatone(audio_path, feat_path, filename):
+def gen_gamatone(filename, feat_path):
 
-    fs, wav = wavfiles.read(audio_path + filename)
-    print(filename)
+    fs, wav = wavfiles.read(filename)
+    fn = filename.split('/')[-1]
+    print(fn)
     if len(wav.shape) > 1:
         wav = wav[:, 0]
     if wav.shape[0] < 441000:
@@ -20,20 +22,21 @@ def gen_gamatone(audio_path, feat_path, filename):
         wav = wav[0:441000]
     gtg = gtgram(wav, fs=fs, window_time=0.04, hop_time=0.02, channels=40, f_min=50).T
 
-    np.save(feat_path + filename, gtg)
+    np.save(feat_path + fn, gtg)
 
     return
 
 
 if __name__ == '__main__':
-
-    audio_path = 'audio/train/weak/'
-    data_list = 'metadata/train/weak.csv'
     feature_path = 'audio/gammatone_feat/train/'
+    '''
+    path = 'audio/test/'
+    data_list = 'metadata/test/test.csv'
     df = pd.read_csv(data_list, sep='\t')
-    X_train_fn = df.filename.values
-
+    X_train_fn = list(df.filename.values)
+    '''
+    X_train_fn, _ = load_validation_data()
     pool = Pool(16)
-    pool.map(partial(gen_gamatone, audio_path=audio_path, feat_path=feature_path), X_train_fn)
+    pool.map(partial(gen_gamatone, feat_path=feature_path), X_train_fn)
     pool.close()
 

@@ -1,2 +1,9 @@
 model name: base_model_4 mode: 1 f1: 0.510259
 model name: base_model_5 mode: 1 f1: 0.318670
+model name: base_model_5 mode: 2 f1: 0.299597
+model name: base_model_3 mode: 3 f1: 0.238202
+model name: base_model_5 mode: 3 valid_f1: 0.241864 test_f1: 0.177521 (optimized)
+model name: base_model_5 mode: 3 valid_f1: 0.328090 test_f1: 0.317836 (optimized)
+model name: base_model_4 mode: 4 valid_f1: 0.449023 test_f1: 0.396851 (optimized)
+model name: base_model_4 mode: 3 valid_f1: 0.416575 test_f1: 0.343001 (optimized)
+model name: base_model_5 mode: 3 valid_f1: 0.319457 test_f1: 0.235138 (optimized)
