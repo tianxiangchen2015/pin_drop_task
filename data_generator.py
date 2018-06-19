@@ -5,6 +5,7 @@ from scipy.signal import spectrogram
 from python_speech_features import logfbank
 from scipy import ndimage
 from gammatone.gtgram import gtgram
+from sklearn import preprocessing
 
 
 def shuffle_data(labels, fns, rnd_seed=None):
@@ -16,19 +17,25 @@ def shuffle_data(labels, fns, rnd_seed=None):
 
 
 class DataGenerator():
-    def __init__(self, batch_size=32, vad_mode=None, data_list=None, mode=1):
+    def __init__(self, batch_size=32, scaler=None, feat_path='audio/gammatone_feat/train/', data_list=None, mode=1, seed=None):
 
         self.train_index = 0
         self.valid_index = 0
         self.test_index = 0
-        self.vad_mode = vad_mode
+        self.seed = seed
+        self.scaler = scaler
         self.batch_size = batch_size
         self.data_list = data_list
         self.mode = mode
-        self.feat_path = 'audio/gammatone_feat/train/'
+        self.feat_path = feat_path
         self.num_classes = 10
         self.train_labels, self.train_fns, self.test_labels, self.test_fns = self.train_valid_split()
 
+    def normalize(self, data):
+        mean = np.mean(data, axis=0)
+        std = np.std(data, axis=0)
+        norm_data = (data - mean) / std
+        return norm_data
 
     def gen_feature(self, filenames):
         if self.mode == 1:
@@ -39,7 +46,6 @@ class DataGenerator():
             x_data = self.gen_filtered_spec(filenames)
         elif self.mode == 4:
             x_data = self.gen_gamatone(filenames)
-
 
         return x_data
 
@@ -112,9 +118,11 @@ class DataGenerator():
             kernel = [-1, 2, -1]
             feat_name = self.feat_path + filename.split('/')[-1] + '.npy'
             gtg = np.load(feat_name)
+            #gtg = self.normalize(gtg)
             delta = ndimage.convolve1d(gtg, weights=kernel, axis=1, mode='nearest')
             delta_2 = ndimage.convolve1d(gtg, weights=kernel, axis=0, mode='nearest')
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            #Sxx = self.normalize(Sxx)
             Sxx_delta = ndimage.convolve1d(Sxx, weights=kernel, axis=1, mode='nearest')
             Sxx_delta_2 = ndimage.convolve1d(Sxx, weights=kernel, axis=0, mode='nearest')
             data = np.dstack((gtg, delta, delta_2, Sxx, Sxx_delta, Sxx_delta_2))
@@ -125,7 +133,7 @@ class DataGenerator():
     def train_valid_split(self):
         
         fns, labels = self.data_list
-        s_labels, s_fns = shuffle_data(labels, fns)
+        s_labels, s_fns = shuffle_data(labels, fns, rnd_seed=self.seed)
         train_size = int(len(s_labels) * 0.7)
 #         self.train_labels = s_labels[0:train_size]
 #         self.train_fns = s_fns[0:train_size]
@@ -204,15 +212,22 @@ class DataGenerator():
 
 
 class AudioGenerator():
-    def __init__(self, batch_size=32, labels=None, fns=None, mode=1):
+    def __init__(self, batch_size=32, scaler=None, feat_path='audio/gammatone_feat/train/', labels=None, fns=None, mode=1):
 
         self.train_index = 0
         self.batch_size = batch_size
         self.train_labels = labels
         self.train_fns = fns
         self.mode = mode
-        self.feat_path = 'audio/gammatone_feat/train/'
+        self.scaler = scaler
+        self.feat_path = feat_path
         self.shuffle_data_by_partition()
+
+    def normalize(self, data):
+        mean = np.mean(data, axis=0)
+        std = np.std(data, axis=0)
+        norm_data = (data - mean) / std
+        return norm_data
 
     def gen_feature(self, filenames):
         if self.mode == 1:
@@ -299,9 +314,11 @@ class AudioGenerator():
             kernel = [-1, 2, -1]
             feat_name = self.feat_path + filename.split('/')[-1] + '.npy'
             gtg = np.load(feat_name)
+            #gtg = self.normalize(gtg)
             delta = ndimage.convolve1d(gtg, weights=kernel, axis=1, mode='nearest')
             delta_2 = ndimage.convolve1d(gtg, weights=kernel, axis=0, mode='nearest')
             Sxx = logfbank(wav, fs, winlen=0.04, winstep=0.02, nfft=2048, nfilt=40)
+            #Sxx = self.normalize(Sxx)
             Sxx_delta = ndimage.convolve1d(Sxx, weights=kernel, axis=1, mode='nearest')
             Sxx_delta_2 = ndimage.convolve1d(Sxx, weights=kernel, axis=0, mode='nearest')
             data = np.dstack((gtg, delta, delta_2, Sxx, Sxx_delta, Sxx_delta_2))
@@ -344,7 +361,16 @@ class AudioGenerator():
             Sxx = self.gen_spectrogram([self.train_fns[rnd]])
         elif self.mode == 2:
             Sxx = self.gen_delta_delta([self.train_fns[rnd]])
+        elif self.mode == 3:
+            Sxx = self.gen_filtered_spec([self.train_fns[rnd]])
+        elif self.mode == 4:
+            Sxx = self.gen_gamatone([self.train_fns[rnd]])
         return self.train_labels, Sxx
+
+    def get_test(self):
+        features = self.gen_feature(self.train_fns)
+        texts = self.train_labels
+        return features, texts    
 
     def get_train_test_num(self):
         return len(self.train_labels)

@@ -28,14 +28,14 @@ def gen_gamatone(filename, feat_path):
 
 
 if __name__ == '__main__':
-    feature_path = 'audio/gammatone_feat/train/'
-    '''
+    feature_path = 'audio_2017/gammatone_feat/train/'
+    
     path = 'audio/test/'
-    data_list = 'metadata/test/test.csv'
-    df = pd.read_csv(data_list, sep='\t')
+    data_list = 'metadata/2017/evaluation_set.csv'
+    df = pd.read_csv(data_list, sep=',')
     X_train_fn = list(df.filename.values)
-    '''
-    X_train_fn, _ = load_validation_data()
+    
+    #X_train_fn, _ = load_validation_data()
     pool = Pool(16)
     pool.map(partial(gen_gamatone, feat_path=feature_path), X_train_fn)
     pool.close()

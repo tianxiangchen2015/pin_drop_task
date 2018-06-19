@@ -6,15 +6,11 @@ from sklearn.metrics import f1_score
 
 def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=None):
     """ get f measure for each class given a model and a generator of data (X, y)
-    Parameters
-    ----------
     keras_model : Model, model to get predictions
     nb_tags : int, number of classes which are represented
     generator : generator, data generator used to get f_measure
     steps : int, number of steps the generator will be used before stopping
     thresholds : int or list, thresholds to apply to each class to binarize probabilities
-    Return
-    ------
     macro_f_measure : list, f measure for each class
     """
 
@@ -55,17 +51,82 @@ def get_f_measure_by_class(keras_model, nb_tags, generator, steps, thresholds=No
         TN += (predictions + y == 0).sum(axis=0)
 
     macro_f_measure = numpy.zeros(nb_tags)
-    mask_f_score = 2*TP + FP + FN != 0
-    macro_f_measure[mask_f_score] = 2*TP[mask_f_score] / (2*TP + FP + FN)[mask_f_score]
+    precision = numpy.zeros(nb_tags)
+    recall = numpy.zeros(nb_tags)
 
-    return numpy.mean(macro_f_measure)
+    mask_f_score = 2*TP + FP + FN != 0
+    mask_precision = TP + FP != 0
+    mask_recall = TP + FN !=0
+
+    macro_f_measure[mask_f_score] = 2*TP[mask_f_score] / (2*TP + FP + FN)[mask_f_score]
+    precision[mask_precision] = TP[mask_precision] / (TP + FP)[mask_precision]
+    recall[mask_recall] = TP[mask_recall] / (TP + FN)[mask_recall]
+
+    return numpy.mean(macro_f_measure), numpy.mean(precision), numpy.mean(recall), TP, FP, FN, TN
+
+
+def get_metrics_by_class(predictions, y, nb_tags, thresholds=None):
+    """ get f measure for each class given a model and a generator of data (X, y)
+    keras_model : Model, model to get predictions
+    nb_tags : int, number of classes which are represented
+    generator : generator, data generator used to get f_measure
+    steps : int, number of steps the generator will be used before stopping
+    thresholds : int or list, thresholds to apply to each class to binarize probabilities
+    macro_f_measure : list, f measure for each class
+    """
+
+    # Calculate external metrics
+    TP = numpy.zeros(nb_tags)
+    TN = numpy.zeros(nb_tags)
+    FP = numpy.zeros(nb_tags)
+    FN = numpy.zeros(nb_tags)
+
+    if len(predictions.shape) == 3:
+            # average data to have weak labels
+        predictions = numpy.mean(predictions, axis=1)
+        y = numpy.mean(y, axis=1)
+
+    if thresholds is None:
+        binarization_type = 'global_threshold'
+        thresh = 0.2
+    else:
+        if type(thresholds) is list:
+            thresh = thresholds
+            binarization_type = "class_threshold"
+        else:
+            binarization_type = "global_threshold"
+            thresh = thresholds
+    predictions = ProbabilityEncoder().binarization(predictions,
+                                                        binarization_type=binarization_type,
+                                                        threshold=thresh,
+                                                        time_axis=0
+                                                        )
+
+    TP += (predictions + y == 2).sum(axis=0)
+    FP += (predictions - y == 1).sum(axis=0)
+    FN += (y - predictions == 1).sum(axis=0)
+    TN += (predictions + y == 0).sum(axis=0)
+
+    macro_f_measure = numpy.zeros(nb_tags)
+    precision = numpy.zeros(nb_tags)
+    recall = numpy.zeros(nb_tags)
+
+    mask_f_score = 2*TP + FP + FN != 0
+    mask_precision = TP + FP != 0
+    mask_recall = TP + FN !=0
+
+    macro_f_measure[mask_f_score] = 2*TP[mask_f_score] / (2*TP + FP + FN)[mask_f_score]
+    precision[mask_precision] = TP[mask_precision] / (TP + FP)[mask_precision]
+    recall[mask_recall] = TP[mask_recall] / (TP + FN)[mask_recall]
+
+    return numpy.mean(macro_f_measure), numpy.mean(precision), numpy.mean(recall), TP, FP, FN, TN
 
 
 def select_threshold(y_pred, y_true):
     best_threshold = []
     grid = numpy.arange(0.0, 0.5, 0.01)
     grid_2 = [0.1, 0.2, 0.3, 0.4, 0.5]
-    for i in range(10):
+    for i in range(y_true.shape[1]):
         y_p = y_pred[:, i]
         y_t = y_true[:, i]
         f1_max = 0
